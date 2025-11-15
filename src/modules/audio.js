@@ -1,5 +1,7 @@
-import UserList from "../../audios/userList.json" assert { type: "json" };
-import fs from "fs";
+import UserList from "../../audios/userList.json" with { type: "json" };
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { VoiceState } from "discord.js";
 import {
   joinVoiceChannel,
@@ -39,10 +41,18 @@ export function playAudio(path, voice) {
  * @returns path of audio file
  */
 export function getAudioFile(key) {
-  const sourceFolder = !UserList[key] ? "../audios/default" : UserList[key];
+  // Get the project root directory
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const projectRoot = path.resolve(__dirname, "../..");
+  
+  // Resolve the audio folder path relative to project root
+  const relativePath = !UserList[key] ? "audios/default" : UserList[key].replace(/^\.\.\//, "");
+  const sourceFolder = path.resolve(projectRoot, relativePath);
+  
   const audioFiles = fs.readdirSync(sourceFolder, (files) => {
     return files;
   });
   const random = Math.floor(Math.random() * audioFiles.length);
-  return `${sourceFolder}/${audioFiles[random]}`;
+  return path.join(sourceFolder, audioFiles[random]);
 }

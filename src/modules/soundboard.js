@@ -1,5 +1,5 @@
 import fs from "fs";
-import sb from "../../soundboard/sbPaths.json" assert { type: "json" };
+import sb from "../../soundboard/sbPaths.json" with { type: "json" };
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
 export const options = Object.keys(sb);

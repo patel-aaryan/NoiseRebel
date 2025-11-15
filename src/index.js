@@ -1,7 +1,14 @@
-import { ButtonBuilder, Client, IntentsBitField, VoiceState } from "discord.js";
+import { Client, IntentsBitField } from "discord.js";
 import { playAudio, getAudioFile } from "./modules/audio.js";
 import { getCategory, getSoundboard, options } from "./modules/soundboard.js";
-import bot from "./credentials.json" assert { type: "json" };
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const bot = {
+  token: process.env.DISCORD_TOKEN,
+  id: process.env.DISCORD_BOT_ID,
+};
 
 const client = new Client({
   intents: [
