@@ -1,4 +1,6 @@
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import sb from "../../soundboard/sbPaths.json" with { type: "json" };
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
@@ -35,10 +37,19 @@ export function getCategory(id) {
   const audios = getAudios(id);
   const buttons = [];
 
+  // Get the project root directory
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const projectRoot = path.resolve(__dirname, "../..");
+  
+  // Resolve the soundboard folder path relative to project root
+  const relativePath = sb[id].replace(/^\.\.\//, "");
+  const resolvedPath = path.resolve(projectRoot, relativePath);
+
   const buttonVector = [];
   let buttonRow = [];
-  for (let i = 0; i < audios.length; i++) {
-    buttonRow.push(audios[i]);
+  for (const element of audios) {
+    buttonRow.push(element);
     if (buttonRow.length == 5) {
       buttonVector.push(buttonRow);
       buttonRow = [];
@@ -50,7 +61,7 @@ export function getCategory(id) {
     const buttonRow = new ActionRowBuilder();
     for (let item of row) {
       const button = new ButtonBuilder()
-        .setCustomId(`${sb[id]}/${item}`)
+        .setCustomId(path.join(resolvedPath, item))
         .setLabel(item.substring(0, item.length - 4))
         .setStyle(ButtonStyle.Secondary);
       buttonRow.addComponents(button);
@@ -77,7 +88,15 @@ export function getCategory(id) {
  * @param {string} id sounboard category
  */
 function getAudios(id) {
-  const source = sb[id];
+  // Get the project root directory
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const projectRoot = path.resolve(__dirname, "../..");
+  
+  // Resolve the soundboard folder path relative to project root
+  const relativePath = sb[id].replace(/^\.\.\//, "");
+  const source = path.resolve(projectRoot, relativePath);
+  
   const audioFiles = fs.readdirSync(source, (files) => {
     return files;
   });

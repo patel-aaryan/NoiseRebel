@@ -47,7 +47,7 @@ export function getAudioFile(key) {
   const projectRoot = path.resolve(__dirname, "../..");
   
   // Resolve the audio folder path relative to project root
-  const relativePath = !UserList[key] ? "audios/default" : UserList[key].replace(/^\.\.\//, "");
+  const relativePath = UserList[key] ? UserList[key].replace(/^\.\.\//, "") : "audios/default";
   const sourceFolder = path.resolve(projectRoot, relativePath);
   
   const audioFiles = fs.readdirSync(sourceFolder, (files) => {
