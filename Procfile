@@ -1,1 +1,1 @@
-worker: npm install && node src/index.js
+worker: node src/index.js
