@@ -25,9 +25,7 @@ export function playAudio(path, voice) {
   });
 
   const player = createAudioPlayer({
-    behaviors: {
-      noSubscriber: NoSubscriberBehavior.Pause,
-    },
+    behaviors: { noSubscriber: NoSubscriberBehavior.Pause },
   });
 
   connection.subscribe(player);
