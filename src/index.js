@@ -20,7 +20,7 @@ const client = new Client({
   ],
 });
 
-client.on("ready", (c) => console.log(`${c.user.username} is Online!`));
+client.on("clientReady", (c) => console.log(`${c.user.username} is Online!`));
 
 // Voice Channel Join
 client.on("voiceStateUpdate", (oldState, newState) => {
