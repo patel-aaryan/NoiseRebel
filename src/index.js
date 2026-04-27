@@ -53,14 +53,14 @@ client.on("interactionCreate", (interaction) => {
     } else {
       const path = interaction.customId;
       const voiceState = interaction.member.voice;
-      if (voiceState.channelId != null) {
-        playAudio(path, voiceState);
-        interaction.deferUpdate();
-      } else {
+      if (voiceState.channelId == null) {
         interaction.reply({
           content: "Join a voice channel first idiot",
           ephemeral: true,
         });
+      } else {
+        playAudio(path, voiceState);
+        interaction.deferUpdate();
       }
     }
   }

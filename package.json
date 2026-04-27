@@ -9,7 +9,7 @@
     "libsodium-wrappers": "^0.7.11",
     "nodemon": "^3.0.1"
   },
-  "name": "ptsb-v2",
+  "name": "noise-rebel",
   "description": "",
   "version": "1.0.0",
   "main": "src/index.js",

@@ -1,5 +1,6 @@
-.env
 node_modules/
-.vscode/
+.env
+.git/
 .DS_Store
+.vscode/
 .claude/
