@@ -12,6 +12,12 @@ import {
 } from "@discordjs/voice";
 
 /**
+ * Join-sound directory map: Discord user ID → folder of clips (see README
+ * "Join sounds and soundboard config"). Unlisted users use `audios/default`.
+ * @typedef {Record<string, string>} UserAudioDirectoryMap
+ */
+
+/**
  * Plays an audio from the list that corresponds to the user that joined voice channel
  * @param {String} path file path of audio
  * @param {VoiceState} voice Voice channel user has currently joined

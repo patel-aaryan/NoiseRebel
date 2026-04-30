@@ -1,6 +1,4 @@
 {
-  "dank": "../soundboard/dank",
-  "other": "../soundboard/other",
-  "roast": "../soundboard/roast",
-  "pog": "../soundboard/pog"
+  "memes": "../soundboard/memes",
+  "quotes": "../soundboard/quotes"
 }

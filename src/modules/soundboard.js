@@ -4,6 +4,11 @@ import { fileURLToPath } from "node:url";
 import sb from "../../soundboard/sbPaths.json" with { type: "json" };
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
+/**
+ * Soundboard category map: button label / category id → folder of clips
+ * (see README "Join sounds and soundboard config").
+ * @typedef {Record<string, string>} SoundboardCategoryMap
+ */
 export const options = Object.keys(sb);
 
 /**
@@ -41,7 +46,7 @@ export function getCategory(id) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const projectRoot = path.resolve(__dirname, "../..");
-  
+
   // Resolve the soundboard folder path relative to project root
   const relativePath = sb[id].replace(/^\.\.\//, "");
   const resolvedPath = path.resolve(projectRoot, relativePath);
@@ -92,11 +97,11 @@ function getAudios(id) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const projectRoot = path.resolve(__dirname, "../..");
-  
+
   // Resolve the soundboard folder path relative to project root
   const relativePath = sb[id].replace(/^\.\.\//, "");
   const source = path.resolve(projectRoot, relativePath);
-  
+
   const audioFiles = fs.readdirSync(source, (files) => {
     return files;
   });
