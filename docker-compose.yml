@@ -1,6 +1,7 @@
+name: noise-rebel
+
 services:
   noise-rebel:
-    container_name: noise-rebel
     build: .
     env_file: .env
     init: true
