@@ -1,5 +1,6 @@
 FROM node:lts-alpine
 
+RUN apk add --no-cache yt-dlp ffmpeg python3
 RUN corepack enable pnpm
 
 WORKDIR /app
@@ -14,12 +15,9 @@ COPY . .
 # Install dependencies (ignoring scripts to be safe)
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Set the working directory to the bot app
-WORKDIR /app/apps/bot
-
-# Create necessary directories
-RUN mkdir -p audios soundboard
+# Set the working directory to the cli app
+WORKDIR /app/apps/cli
 
 ENV AUDIOS_DIR=/app/apps/bot/audios
 
-CMD ["node", "src/index.js"]
+CMD ["pnpm", "start"]
