@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.10.1",
-    "@noise-rebel/db": "workspace:*",
+    "@noise-rebel/infra": "workspace:*",
     "@noise-rebel/types": "workspace:*",
     "dotenv": "^17.2.3",
     "picocolors": "^1.1.1"

@@ -1,5 +1,5 @@
 {
-  "name": "@noise-rebel/db",
+  "name": "@noise-rebel/infra",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,6 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.835.0",
+    "@aws-sdk/s3-request-presigner": "^3.835.0",
     "@neondatabase/serverless": "^1.0.2"
   },
   "devDependencies": {
@@ -21,6 +23,7 @@
   },
   "exports": {
     ".": "./src/postgres.ts",
+    "./r2": "./src/r2.ts",
     "./*": "./src/*"
   }
 }

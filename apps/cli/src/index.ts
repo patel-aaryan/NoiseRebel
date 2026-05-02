@@ -1,6 +1,7 @@
 import "./env"
 
 import { execSync } from "node:child_process"
+import fs from "node:fs"
 import path from "node:path"
 
 import {
@@ -16,7 +17,8 @@ import {
 } from "@clack/prompts"
 import pc from "picocolors"
 
-import { pool, query } from "@noise-rebel/db"
+import { pool, query } from "@noise-rebel/infra"
+import { uploadFile } from "@noise-rebel/infra/r2"
 
 import type { RequestRow } from "@noise-rebel/types"
 
@@ -26,7 +28,7 @@ type Action = "approve" | "reject" | "skip" | "quit"
 
 async function fetchPending(): Promise<RequestRow[]> {
   const res = await query<RequestRow>(
-    `SELECT id, submitter_discord_id, target_discord_id, url, status, file_path, created_at
+    `SELECT id, submitter_discord_id, target_discord_id, url, status, file_path, source, created_at
      FROM requests
      WHERE status = 'PENDING'
      ORDER BY created_at ASC`
@@ -35,11 +37,13 @@ async function fetchPending(): Promise<RequestRow[]> {
 }
 
 function formatRequest(req: RequestRow, index: number, total: number): string {
+  const source = req.source ?? "url"
   return [
     `${pc.dim(`[${index + 1}/${total}]`)} ${pc.bold(req.id)}`,
     `  ${pc.cyan("submitter")} ${req.submitter_discord_id}`,
     `  ${pc.cyan("target   ")} ${req.target_discord_id}`,
     `  ${pc.cyan("url      ")} ${req.url}`,
+    `  ${pc.cyan("source   ")} ${source === "upload" ? pc.magenta("MP3 upload") : "URL"}`,
     `  ${pc.cyan("created  ")} ${req.created_at.toISOString()}`,
   ].join("\n")
 }
@@ -53,22 +57,57 @@ function downloadAudio(req: RequestRow): string {
 }
 
 async function approve(req: RequestRow): Promise<void> {
+  const source = req.source ?? "url"
+
+  if (source === "upload") {
+    // File already in R2 — just mark as approved
+    await query(
+      `UPDATE requests SET status = 'APPROVED' WHERE id = $1`,
+      [req.id]
+    )
+    log.success(`Approved ${pc.bold(req.id)} ${pc.dim("(file already in R2)")}`)
+    return
+  }
+
+  // URL-based: download with yt-dlp, then upload to R2
   const s = spinner()
   s.start(`Downloading audio for ${req.id}`)
   let filename: string
+  let localPath: string
   try {
     filename = downloadAudio(req)
+    localPath = path.join(AUDIOS_DIR, filename)
   } catch (err) {
     s.stop(pc.red("Download failed"))
     throw err
   }
-  s.stop(pc.green(`Downloaded → ${path.join(AUDIOS_DIR, filename)}`))
+  s.stop(pc.green(`Downloaded → ${localPath}`))
+
+  // Upload to R2
+  const r2Key = `audios/${req.id}.mp3`
+  const s2 = spinner()
+  s2.start("Uploading to R2…")
+  try {
+    const fileBuffer = fs.readFileSync(localPath)
+    await uploadFile(r2Key, fileBuffer, "audio/mpeg")
+  } catch (err) {
+    s2.stop(pc.red("R2 upload failed"))
+    throw err
+  }
+  s2.stop(pc.green(`Uploaded → r2://${r2Key}`))
 
   await query(
     `UPDATE requests SET status = 'APPROVED', file_path = $1 WHERE id = $2`,
-    [filename, req.id]
+    [r2Key, req.id]
   )
   log.success(`Approved ${pc.bold(req.id)}`)
+
+  // Clean up local file
+  try {
+    fs.unlinkSync(localPath)
+  } catch {
+    // non-fatal
+  }
 }
 
 async function reject(req: RequestRow): Promise<void> {

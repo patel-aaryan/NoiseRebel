@@ -25,7 +25,7 @@ const isCI = process.env.CI === "true"
 if (!isProduction && !isCI) {
   const repoRoot = path.join(__dirname, "..")
   const envCandidates = [
-    path.join(repoRoot, "packages", "db", ".env.local"),
+    path.join(repoRoot, "packages", "infra", ".env.local"),
     path.join(repoRoot, "packages", "server", "db", ".env.local"),
     path.join(repoRoot, ".env.local"),
   ]
@@ -57,7 +57,7 @@ if (!process.env.DATABASE_URL) {
   process.exit(1)
 }
 
-// Migrations live in packages/db/src/migrations (db package)
+// Migrations live in packages/infra/src/migrations (infra package)
 const migrationsDir = "src/migrations"
 
 // Get the command (up, down, reset, etc.)
@@ -75,7 +75,7 @@ if (command === "create" && !args.includes("--sql-file")) {
 // Run db-migrate from the db package (finds database.json there)
 const dbMigrate = spawn(
   "pnpm",
-  ["--filter", "@noise-rebel/db", "exec", "db-migrate", ...dbMigrateArgs],
+  ["--filter", "@noise-rebel/infra", "exec", "db-migrate", ...dbMigrateArgs],
   {
     stdio: "inherit",
     env: process.env,

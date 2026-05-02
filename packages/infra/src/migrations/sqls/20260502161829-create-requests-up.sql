@@ -7,6 +7,7 @@ CREATE TABLE requests (
   url TEXT NOT NULL,
   status request_status NOT NULL DEFAULT 'PENDING',
   file_path TEXT,
+  source TEXT NOT NULL DEFAULT 'url',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

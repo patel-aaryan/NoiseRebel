@@ -14,7 +14,7 @@
   "dependencies": {
     "@discordjs/core": "^0.6.0",
     "@discordjs/voice": "^0.19.0",
-    "@noise-rebel/db": "workspace:*",
+    "@noise-rebel/infra": "workspace:*",
     "@snazzah/davey": "^0.1.9",
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",

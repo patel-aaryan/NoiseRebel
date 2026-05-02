@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename)
 const repoRoot = path.resolve(__dirname, "../../..")
 
 const candidates = [
-  path.join(repoRoot, "packages/db/.env.local"),
+  path.join(repoRoot, "packages/infra/.env.local"),
   path.join(repoRoot, "apps/cli/.env"),
   path.join(repoRoot, ".env.local"),
 ]
@@ -22,6 +22,6 @@ for (const file of candidates) {
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL is not set. Add it to packages/db/.env.local or export it in the environment."
+    "DATABASE_URL is not set. Add it to packages/infra/.env.local or export it in the environment."
   )
 }

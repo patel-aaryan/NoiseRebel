@@ -1,49 +1,129 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { Button } from "@noise-rebel/ui/components/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@noise-rebel/ui/components/form";
+import { Input } from "@noise-rebel/ui/components/input";
 
-import { submitRequest, type SubmitState } from "@/app/actions";
+import { submitRequest } from "@/app/actions";
+import { UploadForm } from "./upload-form";
 
-export function RequestForm() {
-  const [state, formAction, pending] = useActionState<SubmitState, FormData>(
-    submitRequest,
-    null
-  );
+// ─── Shared ───────────────────────────────────────────────────────────────────
+
+export const discordIdSchema = z
+  .string()
+  .regex(/^\d{17,20}$/, "Must be a Discord user ID (17–20 digits).");
+
+// ─── URL mode ─────────────────────────────────────────────────────────────────
+
+const urlSchema = z.object({
+  target_discord_id: discordIdSchema,
+  url: z.string().url("Must be a valid URL."),
+});
+
+type UrlValues = z.infer<typeof urlSchema>;
+
+function UrlForm() {
+  const [result, setResult] = useState<
+    { ok: true; id: string } | { ok: false; error: string } | null
+  >(null);
+
+  const form = useForm<UrlValues>({
+    resolver: zodResolver(urlSchema),
+    defaultValues: { target_discord_id: "", url: "" },
+  });
+
+  async function onSubmit(values: UrlValues) {
+    const data = new FormData();
+    data.set("target_discord_id", values.target_discord_id);
+    data.set("url", values.url);
+    const res = await submitRequest(null, data);
+    setResult(res);
+    if (res?.ok) form.reset();
+  }
 
   return (
-    <form action={formAction} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Target Discord user ID</span>
-        <input
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <FormField
+          control={form.control}
           name="target_discord_id"
-          required
-          inputMode="numeric"
-          pattern="\d{17,20}"
-          placeholder="123456789012345678"
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Target Discord user ID</FormLabel>
+              <FormControl>
+                <Input inputMode="numeric" placeholder="123456789012345678" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Media URL</span>
-        <input
+        <FormField
+          control={form.control}
           name="url"
-          type="url"
-          required
-          placeholder="https://youtube.com/watch?v=..."
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Media URL</FormLabel>
+              <FormControl>
+                <Input type="url" placeholder="https://youtube.com/watch?v=..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </label>
-      <Button type="submit" disabled={pending} className="self-start">
-        {pending ? "Submitting…" : "Submit request"}
-      </Button>
-      {state && state.ok ? (
-        <p className="text-sm text-emerald-600">
-          Submitted! Request id: <code>{state.id}</code>
-        </p>
-      ) : null}
-      {state && !state.ok ? <p className="text-sm text-destructive">{state.error}</p> : null}
-    </form>
+        <Button type="submit" disabled={form.formState.isSubmitting} className="self-start">
+          {form.formState.isSubmitting ? "Submitting…" : "Submit request"}
+        </Button>
+        {result?.ok && (
+          <p className="text-sm text-emerald-600">
+            Submitted! Request id: <code>{result.id}</code>
+          </p>
+        )}
+        {result && !result.ok && <p className="text-sm text-destructive">{result.error}</p>}
+      </form>
+    </Form>
+  );
+}
+
+// ─── Root component ───────────────────────────────────────────────────────────
+
+type Mode = "url" | "upload";
+
+export function RequestForm() {
+  const [mode, setMode] = useState<Mode>("url");
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Mode toggle */}
+      <div className="flex gap-1 self-start rounded-md border border-input p-1">
+        {(["url", "upload"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+              mode === m
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {m === "url" ? "Paste URL" : "Upload MP3"}
+          </button>
+        ))}
+      </div>
+
+      {mode === "url" ? <UrlForm /> : <UploadForm />}
+    </div>
   );
 }

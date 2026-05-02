@@ -5,7 +5,8 @@
       "*": ["./*"],
       "@/*": ["./*"],
       "@noise-rebel/ui/*": ["../../packages/ui/src/*"],
-      "@noise-rebel/db": ["../../packages/db/src/postgres.ts"],
+      "@noise-rebel/infra": ["../../packages/infra/src/postgres.ts"],
+      "@noise-rebel/infra/*": ["../../packages/infra/src/*"],
       "@noise-rebel/types": ["../../packages/types/src/index.ts"]
     },
     "plugins": [

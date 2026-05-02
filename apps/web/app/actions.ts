@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { auth, signIn, signOut } from "@/auth";
-import { query } from "@noise-rebel/db";
+import { query } from "@noise-rebel/infra";
 
 export type SubmitState = { ok: true; id: string } | { ok: false; error: string } | null;
 

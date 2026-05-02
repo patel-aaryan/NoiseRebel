@@ -11,7 +11,7 @@ const repoRoot = path.resolve(__dirname, "../../..")
 
 for (const file of [
   path.join(repoRoot, "apps/bot/.env"),
-  path.join(repoRoot, "packages/db/.env.local"),
+  path.join(repoRoot, "packages/infra/.env.local"),
 ]) {
   if (fs.existsSync(file)) dotenv.config({ path: file })
 }

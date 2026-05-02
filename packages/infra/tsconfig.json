@@ -3,7 +3,7 @@
   "compilerOptions": {
     "types": ["node"],
     "paths": {
-      "@noise-rebel/db/*": ["./src/*"],
+      "@noise-rebel/infra/*": ["./src/*"],
       "*": ["./*"]
     }
   },

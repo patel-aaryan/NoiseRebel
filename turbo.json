@@ -9,7 +9,11 @@
     "AUTH_TRUST_HOST",
     "DISCORD_TOKEN",
     "DISCORD_BOT_ID",
-    "AUDIOS_DIR"
+    "AUDIOS_DIR",
+    "CLOUDFLARE_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_BUCKET_NAME"
   ],
   "tasks": {
     "build": {
