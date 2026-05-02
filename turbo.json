@@ -1,7 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
-  "globalEnv": ["DATABASE_URL"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "AUTH_SECRET",
+    "AUTH_DISCORD_ID",
+    "AUTH_DISCORD_SECRET",
+    "AUTH_TRUST_HOST",
+    "DISCORD_TOKEN",
+    "DISCORD_BOT_ID",
+    "AUDIOS_DIR"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

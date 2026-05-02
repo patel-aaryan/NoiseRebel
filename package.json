@@ -10,6 +10,8 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck",
     "ui:add": "node scripts/ui-add.js",
+    "cli": "pnpm --filter @noise-rebel/cli start",
+    "bot": "pnpm --filter @noise-rebel/bot start",
     "migrate": "node scripts/migrate.js up",
     "migrate:down": "node scripts/migrate.js down",
     "migrate:reset": "node scripts/migrate.js reset",

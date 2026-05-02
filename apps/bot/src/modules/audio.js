@@ -1,8 +1,5 @@
-import UserList from "../../audios/userList.json" with { type: "json" };
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { VoiceState } from "discord.js";
 import {
   joinVoiceChannel,
   createAudioPlayer,
@@ -11,19 +8,17 @@ import {
   AudioPlayerStatus,
 } from "@discordjs/voice";
 
-/**
- * Join-sound directory map: Discord user ID → folder of clips (see README
- * "Join sounds and soundboard config"). Unlisted users use `audios/default`.
- * @typedef {Record<string, string>} UserAudioDirectoryMap
- */
+import { query } from "@noise-rebel/db";
+
+const AUDIOS_DIR = process.env.AUDIOS_DIR ?? "/app/audios";
 
 /**
- * Plays an audio from the list that corresponds to the user that joined voice channel
- * @param {String} path file path of audio
- * @param {VoiceState} voice Voice channel user has currently joined
+ * Plays an audio file in the given voice state's channel.
+ * @param {string} filePath absolute path to the audio file
+ * @param {import("discord.js").VoiceState} voice voice state of the joining user
  */
-export function playAudio(path, voice) {
-  const audio = createAudioResource(path);
+export function playAudio(filePath, voice) {
+  const audio = createAudioResource(filePath);
   const connection = joinVoiceChannel({
     channelId: voice.channelId,
     guildId: voice.guild.id,
@@ -40,23 +35,27 @@ export function playAudio(path, voice) {
 }
 
 /**
- * Finds path of randomly selected audio corresponding to user
- * @param {string} key Discord user ID
- * @returns path of audio file
+ * Picks a random APPROVED clip for `targetDiscordId` from the DB and plays it
+ * in the user's current voice channel. Reads the file from AUDIOS_DIR.
+ * @param {string} targetDiscordId discord user id of the user that joined
+ * @param {import("discord.js").VoiceState} voice voice state of that user
  */
-export function getAudioFile(key) {
-  // Get the project root directory
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const projectRoot = path.resolve(__dirname, "../..");
-  
-  // Resolve the audio folder path relative to project root
-  const relativePath = UserList[key] ? UserList[key].replace(/^\.\.\//, "") : "audios/default";
-  const sourceFolder = path.resolve(projectRoot, relativePath);
-  
-  const audioFiles = fs.readdirSync(sourceFolder, (files) => {
-    return files;
-  });
-  const random = Math.floor(Math.random() * audioFiles.length);
-  return path.join(sourceFolder, audioFiles[random]);
+export async function playForUser(targetDiscordId, voice) {
+  const { rows } = await query(
+    `SELECT file_path FROM requests
+     WHERE target_discord_id = $1
+        AND status = 'APPROVED'
+       AND file_path IS NOT NULL
+     ORDER BY random()
+     LIMIT 1`,
+    [targetDiscordId]
+  );
+  if (rows.length === 0) return;
+
+  const filePath = path.resolve(AUDIOS_DIR, rows[0].file_path);
+  if (!fs.existsSync(filePath)) {
+    console.warn(`[noise-rebel] file missing on disk: ${filePath}`);
+    return;
+  }
+  playAudio(filePath, voice);
 }

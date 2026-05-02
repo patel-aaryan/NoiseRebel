@@ -1,14 +1,30 @@
-import { Client, IntentsBitField } from "discord.js";
-import { playAudio, getAudioFile } from "./modules/audio.js";
-import { getCategory, getSoundboard, options } from "./modules/soundboard.js";
-import dotenv from "dotenv";
+import fs from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
-dotenv.config();
+import dotenv from "dotenv"
+import { Client, IntentsBitField } from "discord.js"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const repoRoot = path.resolve(__dirname, "../../..")
+
+for (const file of [
+  path.join(repoRoot, "apps/bot/.env"),
+  path.join(repoRoot, "packages/db/.env.local"),
+]) {
+  if (fs.existsSync(file)) dotenv.config({ path: file })
+}
+
+const { playAudio, playForUser } = await import("./modules/audio.js")
+const { getCategory, getSoundboard, options } = await import(
+  "./modules/soundboard.js"
+)
 
 const bot = {
   token: process.env.DISCORD_TOKEN,
   id: process.env.DISCORD_BOT_ID,
-};
+}
 
 const client = new Client({
   intents: [
@@ -18,52 +34,53 @@ const client = new Client({
     IntentsBitField.Flags.MessageContent,
     IntentsBitField.Flags.GuildVoiceStates,
   ],
-});
+})
 
-client.on("clientReady", (c) => console.log(`${c.user.username} is Online!`));
+client.on("clientReady", (c) => console.log(`${c.user.username} is Online!`))
 
-// Voice Channel Join
+// Voice channel join: play the user's APPROVED join sound from the DB.
 client.on("voiceStateUpdate", (oldState, newState) => {
-  let user = newState.member.user.id;
-  // If user joins vc or switches vc
-  // and if user joined is not the bot
+  const userId = newState.member?.user.id
+  if (!userId) return
   if (
     newState.channelId != null &&
-    oldState.channelId != newState.channelId && // Handles if user mutes/deafens
-    user != bot.id
+    oldState.channelId != newState.channelId &&
+    userId !== bot.id
   ) {
-    playAudio(getAudioFile(user), newState);
+    playForUser(userId, newState).catch((err) =>
+      console.error("[noise-rebel] playForUser failed", err)
+    )
   }
-});
+})
 
 // Soundboard
 client.on("messageCreate", (msg) => {
   if (msg.content.toLowerCase() == "-play") {
-    msg.channel.send(getSoundboard());
+    msg.channel.send(getSoundboard())
   }
-});
+})
 
 client.on("interactionCreate", (interaction) => {
   if (interaction.isButton) {
-    const id = interaction.customId;
+    const id = interaction.customId
     if (options.includes(id)) {
-      interaction.update(getCategory(id));
+      interaction.update(getCategory(id))
     } else if (id == "back") {
-      interaction.update(getSoundboard());
+      interaction.update(getSoundboard())
     } else {
-      const path = interaction.customId;
-      const voiceState = interaction.member.voice;
+      const filePath = interaction.customId
+      const voiceState = interaction.member.voice
       if (voiceState.channelId == null) {
         interaction.reply({
           content: "Join a voice channel first idiot",
           ephemeral: true,
-        });
+        })
       } else {
-        playAudio(path, voiceState);
-        interaction.deferUpdate();
+        playAudio(filePath, voiceState)
+        interaction.deferUpdate()
       }
     }
   }
-});
+})
 
-client.login(bot.token);
+client.login(bot.token)

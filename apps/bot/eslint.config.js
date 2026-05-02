@@ -1,9 +1,15 @@
+import globals from "globals"
+
 import { config } from "@noise-rebel/eslint-config/base"
 
 /** @type {import("eslint").Linter.Config} */
 export default [
   ...config,
   {
-    ignores: ["src/migrations/**"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
   },
 ]

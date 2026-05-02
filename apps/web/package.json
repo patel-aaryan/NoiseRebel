@@ -12,9 +12,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@noise-rebel/db": "workspace:*",
+    "@noise-rebel/types": "workspace:*",
     "@noise-rebel/ui": "workspace:*",
     "lucide-react": "^1.14.0",
     "next": "16.1.6",
+    "next-auth": "5.0.0-beta.29",
     "next-themes": "^0.4.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"

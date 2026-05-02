@@ -4,7 +4,9 @@
     "paths": {
       "*": ["./*"],
       "@/*": ["./*"],
-      "@noise-rebel/ui/*": ["../../packages/ui/src/*"]
+      "@noise-rebel/ui/*": ["../../packages/ui/src/*"],
+      "@noise-rebel/db": ["../../packages/db/src/postgres.ts"],
+      "@noise-rebel/types": ["../../packages/types/src/index.ts"]
     },
     "plugins": [
       {
