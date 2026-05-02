@@ -1,0 +1,12 @@
+{
+  "extends": "@noise-rebel/typescript-config/base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@noise-rebel/db/*": ["./src/*"],
+      "*": ["./*"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

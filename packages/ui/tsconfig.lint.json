@@ -1,6 +1,8 @@
 {
-  "extends": "@workspace/typescript-config/react-library.json",
+  "extends": "@noise-rebel/typescript-config/react-library.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "outDir": "dist"
   },
   "include": ["src", "turbo"],

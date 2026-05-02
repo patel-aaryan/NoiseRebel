@@ -14,8 +14,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@workspace/ui/lib/utils",
-    "ui": "@workspace/ui/components"
+    "utils": "@noise-rebel/ui/lib/utils",
+    "ui": "@noise-rebel/ui/components"
   },
   "rtl": false,
   "menuColor": "default",

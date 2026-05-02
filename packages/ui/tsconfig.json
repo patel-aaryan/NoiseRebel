@@ -1,9 +1,11 @@
 {
-  "extends": "@workspace/typescript-config/react-library.json",
+  "extends": "@noise-rebel/typescript-config/react-library.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "paths": {
-      "@workspace/ui/*": ["./src/*"]
+      "*": ["./*"],
+      "@noise-rebel/ui/*": ["./src/*"]
     }
   },
   "include": ["."],

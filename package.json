@@ -2,16 +2,23 @@
   "name": "next-monorepo",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "ui:add": "node scripts/ui-add.js",
+    "migrate": "node scripts/migrate.js up",
+    "migrate:down": "node scripts/migrate.js down",
+    "migrate:reset": "node scripts/migrate.js reset",
+    "migrate:check": "node scripts/migrate.js check",
+    "migrate:create": "node scripts/migrate.js create"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
+    "@noise-rebel/eslint-config": "workspace:*",
+    "@noise-rebel/typescript-config": "workspace:*",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.17",
@@ -20,5 +27,8 @@
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
   }
 }
