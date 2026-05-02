@@ -1,5 +1,5 @@
 {
-  "name": "@noise-rebel/bot",
+  "name": "bot",
   "description": "Discord join-sound bot",
   "version": "1.0.0",
   "main": "src/index.js",

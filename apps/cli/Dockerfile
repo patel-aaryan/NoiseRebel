@@ -1,7 +1,7 @@
 FROM node:lts-alpine
 
-RUN apk add --no-cache yt-dlp ffmpeg python3
-RUN corepack enable pnpm
+RUN apk add --no-cache yt-dlp ffmpeg python3 \
+    && corepack enable pnpm
 
 WORKDIR /app
 

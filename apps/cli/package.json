@@ -1,5 +1,5 @@
 {
-  "name": "@noise-rebel/cli",
+  "name": "cli",
   "version": "0.0.0",
   "private": true,
   "type": "module",
