@@ -17,7 +17,7 @@ import {
 } from "@noise-rebel/ui/components/form";
 import { Input } from "@noise-rebel/ui/components/input";
 
-import { discordIdSchema } from "./request-form";
+import { discordIdSchema } from "@/lib/form-schemas";
 
 const MAX_SIZE = 10 * 1024 * 1024;
 

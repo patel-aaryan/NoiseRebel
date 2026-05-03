@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 
 import { Button } from "@noise-rebel/ui/components/button";
 import {
@@ -17,34 +16,20 @@ import {
 import { Input } from "@noise-rebel/ui/components/input";
 
 import { submitRequest } from "@/app/actions";
+import { type UrlFormValues, urlSchema } from "@/lib/form-schemas";
 import { UploadForm } from "./upload-form";
-
-// ─── Shared ───────────────────────────────────────────────────────────────────
-
-export const discordIdSchema = z
-  .string()
-  .regex(/^\d{17,20}$/, "Must be a Discord user ID (17–20 digits).");
-
-// ─── URL mode ─────────────────────────────────────────────────────────────────
-
-const urlSchema = z.object({
-  target_discord_id: discordIdSchema,
-  url: z.string().url("Must be a valid URL."),
-});
-
-type UrlValues = z.infer<typeof urlSchema>;
 
 function UrlForm() {
   const [result, setResult] = useState<
     { ok: true; id: string } | { ok: false; error: string } | null
   >(null);
 
-  const form = useForm<UrlValues>({
+  const form = useForm<UrlFormValues>({
     resolver: zodResolver(urlSchema),
     defaultValues: { target_discord_id: "", url: "" },
   });
 
-  async function onSubmit(values: UrlValues) {
+  async function onSubmit(values: UrlFormValues) {
     const data = new FormData();
     data.set("target_discord_id", values.target_discord_id);
     data.set("url", values.url);

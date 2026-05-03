@@ -5,9 +5,12 @@ import { revalidatePath } from "next/cache";
 import { auth, signIn, signOut } from "@/auth";
 import { query } from "@noise-rebel/infra";
 
-export type SubmitState = { ok: true; id: string } | { ok: false; error: string } | null;
+type SubmitState = { ok: true; id: string } | { ok: false; error: string } | null;
 
-const DISCORD_ID_PATTERN = /^\d{17,20}$/;
+const AUTH_URL = process.env.AUTH_URL;
+if (!AUTH_URL) throw new Error("AUTH_URL is not set");
+
+const DISCORD_ID = /^\d{17,20}$/;
 
 export async function submitRequest(
   _prev: SubmitState,
@@ -21,12 +24,10 @@ export async function submitRequest(
   const target = formData.get("target_discord_id")?.toString().trim() ?? "";
   const url = formData.get("url")?.toString().trim() ?? "";
 
-  if (!target || !url) {
-    return { ok: false, error: "Both fields are required." };
-  }
-  if (!DISCORD_ID_PATTERN.test(target)) {
-    return { ok: false, error: "Target must be a Discord user ID (17–20 digits)." };
-  }
+  if (!target || !url) return { ok: false, error: "Both fields are required." };
+
+  if (!DISCORD_ID.test(target)) return { ok: false, error: "Target must be Discord user ID." };
+
   try {
     new URL(url);
   } catch {
@@ -45,7 +46,7 @@ export async function submitRequest(
 }
 
 export async function signInWithDiscord() {
-  await signIn("discord", { redirectTo: "/" });
+  await signIn("discord", { redirectTo: AUTH_URL });
 }
 
 export async function signOutAction() {
