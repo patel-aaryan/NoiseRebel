@@ -21,8 +21,11 @@ export async function submitRequest(
     return { ok: false, error: "You must sign in with Discord first." };
   }
 
-  const target = formData.get("target_discord_id")?.toString().trim() ?? "";
-  const url = formData.get("url")?.toString().trim() ?? "";
+  const targetField = formData.get("target_discord_id");
+  const target = typeof targetField === "string" ? targetField.trim() : "";
+
+  const urlField = formData.get("url");
+  const url = typeof urlField === "string" ? urlField.trim() : "";
 
   if (!target || !url) return { ok: false, error: "Both fields are required." };
 

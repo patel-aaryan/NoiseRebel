@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { auth } from "@/auth";
-import { getPresignedUploadUrl } from "@noise-rebel/infra/r2";
+import { getPresignedUploadUrl, publicObjectUrl } from "@noise-rebel/infra/r2";
 import { query } from "@noise-rebel/infra";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -13,10 +13,13 @@ const ALLOWED_TYPES = new Set(["audio/mpeg", "audio/mp3"]);
  * POST /api/upload
  *
  * Authenticated users call this to get a presigned PUT URL for uploading an
- * MP3 directly to R2.  The response also contains the `key` (R2 object key)
+ * MP3 directly to R2. The response also contains the `key` (R2 object key)
  * so the client can confirm the upload afterwards.
  *
  * Body: { targetDiscordId: string, fileName: string, fileSize: number, fileType: string }
+ *
+ * Requires R2 bucket CORS so the browser can PUT to the presigned URL — see
+ * `packages/infra/r2-cors.example.json`.
  */
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -32,7 +35,6 @@ export async function POST(request: NextRequest) {
     fileType: string;
   };
 
-  // Validate inputs
   if (!targetDiscordId || !/^\d{17,20}$/.test(targetDiscordId)) {
     return NextResponse.json(
       { error: "Target must be a Discord user ID (17–20 digits)." },
@@ -52,7 +54,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File must be under 10 MB." }, { status: 400 });
   }
 
-  // Generate an R2 key and a presigned PUT URL
   const requestId = randomUUID();
   const key = `audios/${requestId}.mp3`;
   const uploadUrl = await getPresignedUploadUrl(key, fileType);
@@ -63,8 +64,9 @@ export async function POST(request: NextRequest) {
 /**
  * PUT /api/upload
  *
- * Called by the client *after* the file has been uploaded to R2.
+ * Called by the client after the file has been uploaded to R2.
  * Creates the `requests` row with `source = 'upload'`.
+ * `url` is the public HTTPS object URL (`R2_PUBLIC_BASE_URL` + key).
  *
  * Body: { requestId: string, key: string, targetDiscordId: string }
  */
@@ -88,7 +90,7 @@ export async function PUT(request: NextRequest) {
   await query(
     `INSERT INTO requests (id, submitter_discord_id, target_discord_id, url, status, file_path, source)
      VALUES ($1, $2, $3, $4, 'PENDING', $5, 'upload')`,
-    [requestId, session.discordId, targetDiscordId, `r2://${key}`, key]
+    [requestId, session.discordId, targetDiscordId, publicObjectUrl(key), key]
   );
 
   return NextResponse.json({ ok: true, id: requestId });

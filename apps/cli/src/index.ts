@@ -18,7 +18,7 @@ import {
 import pc from "picocolors";
 
 import { pool, query } from "@noise-rebel/infra";
-import { uploadFile } from "@noise-rebel/infra/r2";
+import { publicObjectUrl, uploadFile } from "@noise-rebel/infra/r2";
 
 import type { RequestRow } from "@noise-rebel/types";
 
@@ -61,13 +61,33 @@ async function approve(req: RequestRow): Promise<void> {
   const source = req.source ?? "url";
 
   if (source === "upload") {
-    // File already in R2 — just mark as approved
-    await query(`UPDATE requests SET status = 'APPROVED' WHERE id = $1`, [req.id]);
-    log.success(`Approved ${pc.bold(req.id)} ${pc.dim("(file already in R2)")}`);
+    const key = req.file_path;
+    if (!key) throw new Error("Upload request is missing file_path (R2 key).");
+
+    const s = spinner();
+    s.start("Copying upload from R2 to audios dir…");
+    const res = await fetch(publicObjectUrl(key));
+    if (!res.ok) {
+      s.stop(pc.red(`Fetch failed (${res.status})`));
+      throw new Error(`Could not download object for bot playback: ${res.status}`);
+    }
+    const buf = Buffer.from(await res.arrayBuffer());
+    const filename = `${req.id}.mp3`;
+    const localPath = path.join(AUDIOS_DIR, filename);
+    fs.mkdirSync(AUDIOS_DIR, { recursive: true });
+    fs.writeFileSync(localPath, buf);
+    s.stop(pc.green(`Saved → ${localPath}`));
+
+    await query(`UPDATE requests SET status = 'APPROVED', file_path = $1 WHERE id = $2`, [
+      filename,
+      req.id,
+    ]);
+    log.success(`Approved ${pc.bold(req.id)}`);
     return;
   }
 
-  // URL-based: download with yt-dlp, then upload to R2
+  // URL-based: download with yt-dlp, upload to R2, keep local copy for the bot
+  fs.mkdirSync(AUDIOS_DIR, { recursive: true });
   const s = spinner();
   s.start(`Downloading audio for ${req.id}`);
   let filename: string;
@@ -92,20 +112,13 @@ async function approve(req: RequestRow): Promise<void> {
     s2.stop(pc.red("R2 upload failed"));
     throw err;
   }
-  s2.stop(pc.green(`Uploaded → r2://${r2Key}`));
+  s2.stop(pc.green(`Uploaded → ${publicObjectUrl(r2Key)}`));
 
   await query(`UPDATE requests SET status = 'APPROVED', file_path = $1 WHERE id = $2`, [
-    r2Key,
+    filename,
     req.id,
   ]);
-  log.success(`Approved ${pc.bold(req.id)}`);
-
-  // Clean up local file
-  try {
-    fs.unlinkSync(localPath);
-  } catch {
-    // non-fatal
-  }
+  log.success(`Approved ${pc.bold(req.id)} (on disk + R2)`);
 }
 
 async function reject(req: RequestRow): Promise<void> {
@@ -125,7 +138,7 @@ async function promptAction(): Promise<Action> {
   const choice = await select<Action>({
     message: "Decision?",
     options: [
-      { value: "approve", label: pc.green("Approve") + " — download & mark APPROVED" },
+      { value: "approve", label: pc.green("Approve") + " — prepare file on disk & APPROVED" },
       { value: "reject", label: pc.red("Reject") + " — delete the row" },
       { value: "skip", label: "Skip — leave PENDING for later" },
       { value: "quit", label: "Quit review" },

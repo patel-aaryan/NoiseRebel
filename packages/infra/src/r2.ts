@@ -1,9 +1,4 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 let _client: S3Client | undefined;
@@ -12,6 +7,19 @@ function env(name: string): string {
   const v = process.env[name];
   if (!v) throw new Error(`${name} is not set`);
   return v;
+}
+
+/**
+ * HTTPS URL for an object key on your public R2 (or CDN) domain.
+ * `R2_PUBLIC_BASE_URL` must be like `https://media.example.com` (no trailing slash).
+ */
+export function publicObjectUrl(key: string): string {
+  const raw = process.env.R2_PUBLIC_BASE_URL;
+  if (!raw?.trim()) throw new Error("R2_PUBLIC_BASE_URL is not set");
+
+  const base = raw.replace(/\/$/, "");
+  const k = key.startsWith("/") ? key.slice(1) : key;
+  return `${base}/${k}`;
 }
 
 /** Lazy-initialised S3-compatible client pointed at Cloudflare R2. */
@@ -41,7 +49,7 @@ function bucket(): string {
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
-  expiresIn = 600,
+  expiresIn = 600
 ): Promise<string> {
   return getSignedUrl(
     r2Client(),
@@ -50,26 +58,7 @@ export async function getPresignedUploadUrl(
       Key: key,
       ContentType: contentType,
     }),
-    { expiresIn },
-  );
-}
-
-/**
- * Returns a presigned GET URL for downloading an object from R2.
- * @param key       Object key
- * @param expiresIn Seconds until the URL expires (default 1 hour)
- */
-export async function getPresignedDownloadUrl(
-  key: string,
-  expiresIn = 3600,
-): Promise<string> {
-  return getSignedUrl(
-    r2Client(),
-    new GetObjectCommand({
-      Bucket: bucket(),
-      Key: key,
-    }),
-    { expiresIn },
+    { expiresIn }
   );
 }
 
@@ -80,7 +69,7 @@ export async function getPresignedDownloadUrl(
 export async function uploadFile(
   key: string,
   body: Buffer | ReadableStream | Uint8Array,
-  contentType: string,
+  contentType: string
 ): Promise<void> {
   await r2Client().send(
     new PutObjectCommand({
@@ -88,7 +77,7 @@ export async function uploadFile(
       Key: key,
       Body: body as any,
       ContentType: contentType,
-    }),
+    })
   );
 }
 
@@ -100,6 +89,6 @@ export async function deleteFile(key: string): Promise<void> {
     new DeleteObjectCommand({
       Bucket: bucket(),
       Key: key,
-    }),
+    })
   );
 }

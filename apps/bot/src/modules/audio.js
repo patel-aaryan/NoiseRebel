@@ -9,13 +9,12 @@ import {
 } from "@discordjs/voice";
 
 import { query } from "@noise-rebel/infra";
-import { getPresignedDownloadUrl } from "@noise-rebel/infra/r2";
 
 const AUDIOS_DIR = process.env.AUDIOS_DIR ?? "/app/audios";
 
 /**
  * Plays an audio file in the given voice state's channel.
- * @param {string} source absolute path or URL to the audio
+ * @param {string} source absolute path to the audio file on disk
  * @param {import("discord.js").VoiceState} voice voice state of the joining user
  */
 export function playAudio(source, voice) {
@@ -36,12 +35,22 @@ export function playAudio(source, voice) {
 }
 
 /**
+ * Resolves `file_path` to an absolute path under AUDIOS_DIR, or null if invalid.
+ * @param {string} filePath path relative to AUDIOS_DIR (e.g. "<uuid>.mp3")
+ */
+function resolveUnderAudiosDir(filePath) {
+  if (path.isAbsolute(filePath)) return null;
+  const root = path.resolve(AUDIOS_DIR);
+  const candidate = path.resolve(root, filePath);
+  const rel = path.relative(root, candidate);
+  if (!rel || rel.startsWith("..") || path.isAbsolute(rel)) return null;
+  return candidate;
+}
+
+/**
  * Picks a random APPROVED clip for `targetDiscordId` from the DB and plays it
- * in the user's current voice channel.
- *
- * If the file_path looks like an R2 key (e.g. "audios/<uuid>.mp3"), it fetches
- * a presigned download URL from R2 and streams it. Otherwise it falls back to
- * reading from AUDIOS_DIR on disk (legacy behaviour).
+ * in the user's current voice channel. Audio is always read from disk under
+ * AUDIOS_DIR; `file_path` must be relative to that directory.
  *
  * @param {string} targetDiscordId discord user id of the user that joined
  * @param {import("discord.js").VoiceState} voice voice state of that user
@@ -59,22 +68,11 @@ export async function playForUser(targetDiscordId, voice) {
   if (rows.length === 0) return;
 
   const filePath = rows[0].file_path;
-
-  // R2 key pattern: starts with "audios/" (no leading slash, no absolute path)
-  const isR2Key = filePath.startsWith("audios/") && !path.isAbsolute(filePath);
-
-  if (isR2Key) {
-    try {
-      const url = await getPresignedDownloadUrl(filePath);
-      playAudio(url, voice);
-    } catch (err) {
-      console.error(`[noise-rebel] R2 download failed for ${filePath}:`, err);
-    }
+  const localPath = resolveUnderAudiosDir(filePath);
+  if (!localPath) {
+    console.warn(`[noise-rebel] invalid or unsafe file_path: ${filePath}`);
     return;
   }
-
-  // Legacy: local file on disk
-  const localPath = path.resolve(AUDIOS_DIR, filePath);
   if (!fs.existsSync(localPath)) {
     console.warn(`[noise-rebel] file missing on disk: ${localPath}`);
     return;

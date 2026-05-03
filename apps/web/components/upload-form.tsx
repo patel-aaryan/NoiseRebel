@@ -52,7 +52,6 @@ export function UploadForm() {
     setResult({ step: "idle" });
 
     try {
-      // 1. Get presigned PUT URL
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,7 +68,6 @@ export function UploadForm() {
       }
       const { uploadUrl, key, requestId } = await res.json();
 
-      // 2. Upload directly to R2
       const putRes = await fetch(uploadUrl, {
         method: "PUT",
         body: file,
@@ -77,7 +75,6 @@ export function UploadForm() {
       });
       if (!putRes.ok) throw new Error("Failed to upload file to storage.");
 
-      // 3. Confirm
       const confirmRes = await fetch("/api/upload", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -95,10 +92,15 @@ export function UploadForm() {
       setResult({ step: "done", id: requestId });
       form.reset();
     } catch (err) {
-      setResult({
-        step: "error",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      let message: string;
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        message = "Could not reach storage.";
+      } else if (err instanceof Error) {
+        message = err.message;
+      } else {
+        message = String(err);
+      }
+      setResult({ step: "error", message });
     }
   }
 
