@@ -15,7 +15,7 @@ A Discord bot that plays custom audio clips when users join voice channels and p
    npm install
    ```
 
-2. Create a `.env` file in the root directory with your Discord bot credentials:
+2. Create `apps/bot/.env.local` (or use `pnpm`/repo scripts to pull secrets) with your Discord bot credentials:
 
    ```
    DISCORD_TOKEN=your_discord_bot_token_here

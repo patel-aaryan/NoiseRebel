@@ -25,7 +25,10 @@ const uploadSchema = z.object({
   target_discord_id: discordIdSchema,
   file: z
     .custom<FileList>((v) => v instanceof FileList && v.length > 0, "Please select a file.")
-    .refine((v) => v[0]?.type === "audio/mpeg" || v[0]?.name.endsWith(".mp3"), "Only MP3 files are allowed.")
+    .refine(
+      (v) => v[0]?.type === "audio/mpeg" || v[0]?.name.endsWith(".mp3"),
+      "Only MP3 files are allowed."
+    )
     .refine((v) => (v[0]?.size ?? 0) <= MAX_SIZE, "File must be under 10 MB."),
 });
 
@@ -137,11 +140,7 @@ export function UploadForm() {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={form.formState.isSubmitting}
-          className="self-start"
-        >
+        <Button type="submit" disabled={form.formState.isSubmitting} className="self-start">
           {form.formState.isSubmitting ? "Uploading…" : "Upload & submit"}
         </Button>
         {result.step === "done" && (
