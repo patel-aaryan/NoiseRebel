@@ -38,8 +38,9 @@ async function fetchPending(): Promise<RequestRow[]> {
 
 function formatRequest(req: RequestRow, index: number, total: number): string {
   const source = req.source ?? "url";
+  const position = `[${index + 1}/${total}]`;
   return [
-    `${pc.dim(`[${index + 1}/${total}]`)} ${pc.bold(req.id)}`,
+    `${pc.dim(position)} ${pc.bold(req.id)}`,
     `  ${pc.cyan("submitter")} ${req.submitter_discord_id}`,
     `  ${pc.cyan("target   ")} ${req.target_discord_id}`,
     `  ${pc.cyan("url      ")} ${req.url}`,
@@ -150,14 +151,21 @@ async function main(): Promise<void> {
     log.message(formatRequest(req, i, pending.length));
 
     const action = await promptAction();
-    if (action === "quit") break;
-    if (action === "skip") {
-      log.info("Skipped.");
-      continue;
-    }
+
     try {
-      if (action === "approve") await approve(req);
-      else await reject(req);
+      switch (action) {
+        case "quit":
+          break;
+        case "skip":
+          log.info("Skipped.");
+          continue;
+        case "approve":
+          await approve(req);
+          break;
+        default:
+          await reject(req);
+          break;
+      }
     } catch (err) {
       log.error(err instanceof Error ? err.message : String(err));
       const keepGoing = await confirm({
