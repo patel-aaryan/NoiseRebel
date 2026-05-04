@@ -1,0 +1,28 @@
+{
+  "name": "cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx src/index.ts",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.1",
+    "@noise-rebel/infra": "workspace:*",
+    "@noise-rebel/types": "workspace:*",
+    "dotenv": "^17.2.3",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@noise-rebel/eslint-config": "workspace:*",
+    "@noise-rebel/typescript-config": "workspace:*",
+    "@types/node": "^22.15.30",
+    "eslint": "^9.39.2",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3"
+  }
+}

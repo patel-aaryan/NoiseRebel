@@ -1,23 +1,38 @@
 {
-  "dependencies": {
-    "@discordjs/core": "^0.6.0",
-    "@discordjs/voice": "^0.19.0",
-    "@snazzah/davey": "^0.1.9",
-    "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
-    "ffmpeg-static": "^5.1.0",
-    "libsodium-wrappers": "^0.7.11",
-    "nodemon": "^3.0.1"
-  },
-  "name": "noise-rebel",
-  "description": "",
-  "version": "1.0.0",
-  "main": "src/index.js",
+  "name": "next-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=web...",
+    "dev:cli": "turbo dev --filter=cli...",
+    "dev:bot": "turbo dev --filter=bot...",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "typecheck": "turbo typecheck",
+    "ui:add": "node scripts/ui-add.js",
+    "pull-secrets": "node scripts/pull-secrets.js",
+    "migrate": "node scripts/migrate.js up",
+    "migrate:down": "node scripts/migrate.js down",
+    "migrate:reset": "node scripts/migrate.js reset",
+    "migrate:check": "node scripts/migrate.js check",
+    "migrate:create": "node scripts/migrate.js create"
   },
-  "author": "",
-  "license": "ISC",
-  "type": "module"
+  "devDependencies": {
+    "@noise-rebel/eslint-config": "workspace:*",
+    "@noise-rebel/typescript-config": "workspace:*",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "turbo": "^2.8.17",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
 }

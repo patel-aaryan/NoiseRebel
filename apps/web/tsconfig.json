@@ -1,0 +1,26 @@
+{
+  "extends": "@noise-rebel/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "*": ["./*"],
+      "@/*": ["./*"],
+      "@noise-rebel/ui/*": ["../../packages/ui/src/*"],
+      "@noise-rebel/infra": ["../../packages/infra/src/postgres.ts"],
+      "@noise-rebel/infra/*": ["../../packages/infra/src/*"],
+      "@noise-rebel/types": ["../../packages/types/src/index.ts"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

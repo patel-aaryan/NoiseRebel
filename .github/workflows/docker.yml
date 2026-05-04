@@ -1,16 +1,20 @@
 name: Publish Docker Image
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build-apps:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        app: [bot, cli]
 
     steps:
       - name: Checkout code
@@ -23,9 +27,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push ${{ matrix.app }}
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: apps/${{ matrix.app }}/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/noise-rebel:latest
+          tags: ghcr.io/${{ github.repository_owner }}/noise-rebel-${{ matrix.app }}:latest

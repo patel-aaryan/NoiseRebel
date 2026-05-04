@@ -1,8 +1,26 @@
 name: noise-rebel
 
 services:
-  noise-rebel:
-    build: .
-    env_file: .env
+  bot:
+    build: 
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    env_file: packages/infra/.env.local
     init: true
     restart: unless-stopped
+    volumes:
+      - audios_data:/app/apps/bot/audios
+
+  cli:
+    build:
+      context: .
+      dockerfile: apps/cli/Dockerfile
+    env_file: packages/infra/.env.local
+    profiles: ["cli"]
+    stdin_open: true
+    tty: true
+    volumes:
+      - audios_data:/app/apps/bot/audios
+
+volumes:
+  audios_data:

@@ -1,0 +1,1 @@
+export { default } from "@noise-rebel/ui/postcss.config";

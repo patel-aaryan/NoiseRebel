@@ -1,0 +1,29 @@
+{
+  "name": "@noise-rebel/infra",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.835.0",
+    "@aws-sdk/s3-request-presigner": "^3.835.0",
+    "@neondatabase/serverless": "^1.0.2"
+  },
+  "devDependencies": {
+    "db-migrate": "^0.11.14",
+    "db-migrate-pg": "^1.5.2",
+    "@noise-rebel/eslint-config": "workspace:*",
+    "@noise-rebel/typescript-config": "workspace:*",
+    "@types/node": "^22.15.30",
+    "eslint": "^9.39.2",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./src/postgres.ts",
+    "./r2": "./src/r2.ts",
+    "./*": "./src/*"
+  }
+}

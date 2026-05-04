@@ -1,0 +1,20 @@
+{
+  "name": "@noise-rebel/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@noise-rebel/eslint-config": "workspace:*",
+    "@noise-rebel/typescript-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  }
+}

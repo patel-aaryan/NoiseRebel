@@ -1,0 +1,4 @@
+{
+  "extends": "@noise-rebel/typescript-config/base.json"
+}
+
